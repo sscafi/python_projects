@@ -1,0 +1,4 @@
+The following file : "PyAudio-0.2.11-cp39-cp39-win_amd64" 
+is required for the voice recognition to work,
+this is the file that worked for me however online 
+you can find similar python audio libraries and replace it in code
