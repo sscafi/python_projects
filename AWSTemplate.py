@@ -1,0 +1,33 @@
+import boto3
+
+# Create an S3 client object
+s3 = boto3.client('s3')
+
+# Upload a file to S3
+bucket_name = 'my-bucket-name'
+file_name = 'path/to/local/file.txt'
+object_name = 'file.txt'
+
+s3.upload_file(file_name, bucket_name, object_name)
+
+# Download a file from S3
+bucket_name = 'my-bucket-name'
+object_name = 'file.txt'
+file_name = 'path/to/local/file.txt'
+
+s3.download_file(bucket_name, object_name, file_name)
+
+# Create an EC2 client object
+ec2 = boto3.client('ec2')
+
+# Launch an EC2 instance
+image_id = 'ami-0c55b159cbfafe1f0'
+instance_type = 't2.micro'
+key_name = 'my-key-pair'
+
+response = ec2.run_instances(ImageId=image_id, InstanceType=instance_type, KeyName=key_name)
+
+# Terminate an EC2 instance
+instance_id = 'i-0123456789abcdef0'
+
+ec2.terminate_instances(InstanceIds=[instance_id])
