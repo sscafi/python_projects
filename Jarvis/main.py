@@ -1,6 +1,3 @@
-Here's the code with added comments explaining each line:
-
-```python
 # Importing necessary libraries
 import pyttsx3  # pip install pyttsx3 - Library for text to speech conversion
 import speech_recognition as sr  # pip install speechRecognition - Library for speech recognition
