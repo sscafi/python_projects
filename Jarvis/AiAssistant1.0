@@ -1,111 +1,123 @@
-import nltk
-from nltk.sentiment import SentimentIntensityAnalyzer
-import spacy
-from surprise import SVD, Dataset, Reader
-import mysql.connector
+# Importing necessary libraries
+import nltk  # Library for natural language processing
+from nltk.sentiment import SentimentIntensityAnalyzer  # Sentiment analysis tool from nltk
+import spacy  # Library for advanced natural language processing
+from surprise import SVD, Dataset, Reader  # Libraries for collaborative filtering and recommendation systems
+import mysql.connector  # Library for MySQL database management
 
 # Step 1: Natural Language Processing (NLP)
+# Function to tokenize text into words
 def tokenize_text(text):
     return nltk.word_tokenize(text)
 
+# Function to extract named entities from text
 def extract_entities(text):
-    nlp = spacy.load('en_core_web_sm')
-    doc = nlp(text)
-    entities = [(entity.text, entity.label_) for entity in doc.ents]
+    nlp = spacy.load('en_core_web_sm')  # Loading the small English model from spacy
+    doc = nlp(text)  # Processing the text
+    entities = [(entity.text, entity.label_) for entity in doc.ents]  # Extracting entities and their labels
     return entities
 
+# Function to analyze sentiment of the text
 def analyze_sentiment(text):
-    sid = SentimentIntensityAnalyzer()
-    sentiment_scores = sid.polarity_scores(text)
-    return sentiment_scores['compound']
+    sid = SentimentIntensityAnalyzer()  # Initializing sentiment intensity analyzer
+    sentiment_scores = sid.polarity_scores(text)  # Getting sentiment scores
+    return sentiment_scores['compound']  # Returning the compound score
 
 # Step 2: Machine Learning and Recommendation Systems
+# Function to train a collaborative filtering model using SVD
 def train_collaborative_filtering_model(ratings_df):
-    reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(ratings_df[['user_id', 'item_id', 'rating']], reader)
-    model = SVD()
-    trainset = data.build_full_trainset()
-    model.fit(trainset)
+    reader = Reader(rating_scale=(1, 5))  # Defining the rating scale
+    data = Dataset.load_from_df(ratings_df[['user_id', 'item_id', 'rating']], reader)  # Loading data
+    model = SVD()  # Initializing SVD model
+    trainset = data.build_full_trainset()  # Building the training set
+    model.fit(trainset)  # Training the model
     return model
 
+# Function to get recommendations for a user
 def get_recommendations(model, user_id):
-    recommendations = model.get_recommendations(user_id)
+    recommendations = model.get_recommendations(user_id)  # Getting recommendations for the user
     return recommendations
 
 # Step 3: Database Management
+# Function to connect to the MySQL database
 def connect_to_database():
     conn = mysql.connector.connect(
-        host='localhost',
-        user='username',
-        password='password',
-        database='assistant_db'
+        host='localhost',  # Database host
+        user='username',  # Database username
+        password='password',  # Database password
+        database='assistant_db'  # Database name
     )
     return conn
 
+# Function to retrieve user preferences from the database
 def retrieve_user_preferences(conn, user_id):
-    cursor = conn.cursor()
-    query = "SELECT preference FROM user_preferences WHERE user_id = %s"
-    cursor.execute(query, (user_id,))
-    preferences = cursor.fetchall()
+    cursor = conn.cursor()  # Creating a cursor object
+    query = "SELECT preference FROM user_preferences WHERE user_id = %s"  # Query to fetch user preferences
+    cursor.execute(query, (user_id,))  # Executing the query
+    preferences = cursor.fetchall()  # Fetching all preferences
     return preferences
 
+# Function to update user preferences in the database
 def update_user_preferences(conn, user_id, preference):
-    cursor = conn.cursor()
-    query = "INSERT INTO user_preferences (user_id, preference) VALUES (%s, %s)"
-    cursor.execute(query, (user_id, preference))
-    conn.commit()
+    cursor = conn.cursor()  # Creating a cursor object
+    query = "INSERT INTO user_preferences (user_id, preference) VALUES (%s, %s)"  # Query to insert user preference
+    cursor.execute(query, (user_id, preference))  # Executing the query
+    conn.commit()  # Committing the transaction
 
+# Function to close the database connection
 def close_database_connection(conn):
-    conn.close()
+    conn.close()  # Closing the connection
 
 # Step 4: User Interaction and Interface
+# Function to process user input
 def process_user_input(user_input):
     # Step 1: NLP - Tokenization
-    tokens = tokenize_text(user_input)
+    tokens = tokenize_text(user_input)  # Tokenizing the user input
     
     # Step 1: NLP - Entity Extraction
-    entities = extract_entities(user_input)
+    entities = extract_entities(user_input)  # Extracting entities from user input
 
     # Step 1: NLP - Sentiment Analysis
-    sentiment_score = analyze_sentiment(user_input)
+    sentiment_score = analyze_sentiment(user_input)  # Analyzing sentiment of user input
 
     # Step 3: Database Management - Store user input and sentiment score
-    conn = connect_to_database()
-    update_user_preferences(conn, user_id, sentiment_score)
-    close_database_connection(conn)
+    conn = connect_to_database()  # Connecting to the database
+    update_user_preferences(conn, user_id, sentiment_score)  # Updating user preferences
+    close_database_connection(conn)  # Closing the database connection
 
     # Step 4: User Interaction - Provide response
-    print("Assistant: Tokens -", tokens)
-    print("Assistant: Entities -", entities)
-    print("Assistant: Sentiment Score -", sentiment_score)
+    print("Assistant: Tokens -", tokens)  # Printing tokens
+    print("Assistant: Entities -", entities)  # Printing entities
+    print("Assistant: Sentiment Score -", sentiment_score)  # Printing sentiment score
 
 # Step 5: Continuous Learning and Database Updates
+# Function to handle user feedback and update preferences
 def handle_user_feedback(user_feedback, conn, user_id):
-    if user_feedback.lower() == 'yes':
+    if user_feedback.lower() == 'yes':  # Checking if feedback is positive
         preference = 'positive'
     else:
         preference = 'negative'
-    update_user_preferences(conn, user_id, preference)
+    update_user_preferences(conn, user_id, preference)  # Updating user preferences based on feedback
 
 # Sample usage
 def main():
     # Sample data
-    ratings_df = pd.read_csv('ratings.csv')
+    ratings_df = pd.read_csv('ratings.csv')  # Reading ratings data from CSV
 
     # Step 2: Machine Learning - Train collaborative filtering model
-    collaborative_model = train_collaborative_filtering_model(ratings_df)
+    collaborative_model = train_collaborative_filtering_model(ratings_df)  # Training the model
 
     while True:
-        user_input = input("Enter your query: ")
+        user_input = input("Enter your query: ")  # Taking user input
 
         # Step 4: User Interaction and Interface
-        process_user_input(user_input)
+        process_user_input(user_input)  # Processing user input
 
         # Step 5: Continuous Learning and Database Updates
-        user_feedback = input("Did you find the recommendation helpful? (Yes/No): ")
-        conn = connect_to_database()
-        handle_user_feedback(user_feedback, conn, user_id)
-        close_database_connection(conn)
+        user_feedback = input("Did you find the recommendation helpful? (Yes/No): ")  # Taking user feedback
+        conn = connect_to_database()  # Connecting to the database
+        handle_user_feedback(user_feedback, conn, user_id)  # Handling user feedback
+        close_database_connection(conn)  # Closing the database connection
 
 if __name__ == "__main__":
-    main()
+    main()  # Running the main function
