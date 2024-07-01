@@ -15,13 +15,24 @@ class SpeechRecognitionThread(QObject):
         self.translator = Translator()
 
     def run(self):
+        """
+        Continuously listens to microphone input, recognizes speech,
+        translates it, and emits a signal with the original and translated text.
+        """
         with sr.Microphone() as source:
             self.recognizer.adjust_for_ambient_noise(source)
             while self.is_running:
                 try:
+                    # Listen for audio input
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=5)
+                    
+                    # Recognize speech using Google Speech Recognition
                     text = self.recognizer.recognize_google(audio)
+                    
+                    # Translate recognized text
                     translated = self.translator.translate(text)
+                    
+                    # Emit signal with original and translated text
                     self.textDetected.emit(f"Original ({self.translator.detect(text).lang}): {text}\nTranslated ({translated.dest}): {translated.text}")
                 except sr.WaitTimeoutError:
                     pass
@@ -31,6 +42,7 @@ class SpeechRecognitionThread(QObject):
                     print(f"An error occurred: {e}")
 
     def stop(self):
+        """Stop the speech recognition thread."""
         self.is_running = False
 
 class VoiceTranslator(QWidget):
@@ -42,6 +54,7 @@ class VoiceTranslator(QWidget):
         self.speech_thread.textDetected.connect(self.updateText)
 
     def initUI(self):
+        """Initialize the user interface."""
         self.setWindowTitle('Real-time Voice Translator')
         self.setGeometry(100, 100, 400, 300)
 
@@ -60,6 +73,7 @@ class VoiceTranslator(QWidget):
         self.is_translating = False
 
     def toggleTranslation(self):
+        """Toggle the start and stop of translation."""
         if not self.is_translating:
             self.startButton.setText('Stop Translation')
             self.is_translating = True
@@ -74,10 +88,12 @@ class VoiceTranslator(QWidget):
             self.speech_thread.textDetected.connect(self.updateText)
 
     def updateText(self, text):
+        """Update the text in the QTextEdit widget."""
         self.textEdit.append(text)
         self.textEdit.append("------------------------")
 
     def closeEvent(self, event):
+        """Stop the speech recognition thread on application close."""
         self.speech_thread.stop()
         if self.thread.is_alive():
             self.thread.join()
@@ -88,4 +104,3 @@ if __name__ == '__main__':
     translator = VoiceTranslator()
     translator.show()
     sys.exit(app.exec_())
-    
