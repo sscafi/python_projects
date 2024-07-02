@@ -3,11 +3,19 @@ import mysql.connector
 
 # Function to connect to the database and retrieve the commands
 def get_commands():
+    """
+    Connects to the 'jarvis' database on localhost using MySQL Connector,
+    retrieves commands stored in the 'commands' table, and returns them
+    as a dictionary where keys are command names and values are corresponding actions.
+    
+    Returns:
+    dict: A dictionary mapping command names to actions.
+    """
     # Establish a connection to the database
     db = mysql.connector.connect(
         host="localhost",
-        user="yourusername",
-        password="yourpassword",
+        user="yourusername",      # Replace with your MySQL username
+        password="yourpassword",  # Replace with your MySQL password
         database="jarvis"
     )
 
