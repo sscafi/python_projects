@@ -1,4 +1,15 @@
-The following file : "PyAudio-0.2.11-cp39-cp39-win_amd64" 
-is required for the voice recognition to work,
-this is the file that worked for me however online 
-you can find similar python audio libraries and replace it in code
+Jarvis
+As the project name says i am trying to replicate Iron mans Jarvis software. I know everyone who loves iron man wishes they could have their own jarvis !! here is a simplified version of it i will add on to it over time however this is also a template for anyone to use! so please feel free to download it and make any adjustments you need for your own preferences.
+
+🛠️ Installation Steps:
+1. There are two files for the jarvis program new and main. The new one is uses sql to store all the commands into a database to make the code less cluttered as overtime you might make this overly complicated and its easier to store everything seperately .
+
+2. Text to speach conversion
+
+pip install pyttsx3
+3. Speach recognition
+
+pip install speechRecognition
+4. SQL connector
+
+pip install mysql-connector-python
