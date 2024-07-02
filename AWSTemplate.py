@@ -1,3 +1,20 @@
+"""
+AWS Operations with Boto3
+
+This script demonstrates basic operations using Boto3 to interact with AWS services.
+It performs operations such as uploading and downloading files from S3, launching and
+terminating EC2 instances.
+
+🛠️ Installation Steps:
+1. Install Boto3
+   pip install boto3
+
+2. AWS Credentials Setup
+   Ensure AWS credentials are configured either through environment variables, AWS CLI,
+   or IAM roles if running on an AWS resource.
+
+"""
+
 import boto3
 
 # Create an S3 client object
