@@ -2,6 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 
 def validate_job_posting(job_title, company_name, job_board_url):
+    """
+    Validates the authenticity of a job posting by checking its details against a job board's website.
+
+    Args:
+    - job_title (str): The title of the job posting to validate.
+    - company_name (str): The name of the company associated with the job posting.
+    - job_board_url (str): The URL of the job board where the job posting is listed.
+
+    Returns:
+    - bool: True if an authentic job posting matching the provided details is found, False otherwise.
+    """
+
     try:
         # Step 1: Fetch the job board page HTML
         response = requests.get(job_board_url)
