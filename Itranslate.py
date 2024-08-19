@@ -3,7 +3,7 @@ from googletrans import Translator
 import sys
 import threading
 import logging
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QTextEdit, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QTextEdit
 from PyQt5.QtCore import pyqtSignal, QObject
 
 # Set up logging
@@ -12,12 +12,11 @@ logging.basicConfig(level=logging.DEBUG)
 class SpeechRecognitionThread(QObject):
     textDetected = pyqtSignal(str)
     
-    def __init__(self, target_language='en'):
+    def __init__(self):
         super().__init__()
         self.recognizer = sr.Recognizer()
         self.is_running = True
         self.translator = Translator()
-        self.target_language = target_language
 
     def run(self):
         with sr.Microphone() as source:
@@ -30,15 +29,15 @@ class SpeechRecognitionThread(QObject):
                     text = self.recognizer.recognize_google(audio)
                     logging.debug(f"Recognized text: {text}")
 
-                    # Detect language and translate
+                    # Detect language and translate to English
                     detected_lang = self.translator.detect(text).lang
                     logging.debug(f"Detected language: {detected_lang}")
-                    translated = self.translator.translate(text, dest=self.target_language)
+                    translated = self.translator.translate(text, dest='en')
 
                     # Emit the translation result
                     self.textDetected.emit(
                         f"Original ({detected_lang}): {text}\n"
-                        f"Translated ({self.target_language}): {translated.text}"
+                        f"Translated (English): {translated.text}"
                     )
                 except sr.WaitTimeoutError:
                     logging.debug("Timeout error, no speech detected.")
@@ -71,31 +70,17 @@ class VoiceTranslator(QWidget):
         self.textEdit.setPlaceholderText("Translated text will appear here...")
         layout.addWidget(self.textEdit)
 
-        self.languageComboBox = QComboBox(self)
-        self.languageComboBox.addItems([
-            'en', 'es', 'fr', 'de', 'zh-cn', 'ja', 'ko', 'ru', 'ar', 'pt', 'it', 'nl', 'sv'
-        ])
-        self.languageComboBox.setCurrentText('en')  # Default to English
-        self.languageComboBox.currentTextChanged.connect(self.updateTargetLanguage)
-        layout.addWidget(self.languageComboBox)
-
         self.setLayout(layout)
         self.is_translating = False
-
-    def updateTargetLanguage(self, language_code):
-        if self.speech_thread:
-            self.speech_thread.stop()
-            self.thread.join()
-        self.speech_thread = SpeechRecognitionThread(target_language=language_code)
-        self.speech_thread.textDetected.connect(self.updateText)
-        self.thread = threading.Thread(target=self.speech_thread.run)
-        self.thread.start()
 
     def toggleTranslation(self):
         if not self.is_translating:
             self.startButton.setText('Stop Translation')
             self.is_translating = True
-            self.updateTargetLanguage(self.languageComboBox.currentText())
+            self.speech_thread = SpeechRecognitionThread()
+            self.speech_thread.textDetected.connect(self.updateText)
+            self.thread = threading.Thread(target=self.speech_thread.run)
+            self.thread.start()
         else:
             self.startButton.setText('Start Translation')
             self.is_translating = False
@@ -135,7 +120,7 @@ def test_speech_recognition():
 def test_translation():
     translator = Translator()
     text = "Hello, how are you?"
-    translated = translator.translate(text)
+    translated = translator.translate(text, dest='en')
     logging.info(f"Original: {text}")
     logging.info(f"Translated: {translated.text}")
 
